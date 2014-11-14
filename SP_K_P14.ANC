@@ -402,7 +402,7 @@ E38=E38+E30
 E37=E37+1                       ;increment count 
 (GTO,L3,E37<2)
 ;*******************************************************************************
-;              end  passage of the tool 
+;              end  passage of  tool 
 ;*******************************************************************************
 M15                             ;spindle stop
 ;//-------------------------------------------------------------------------
@@ -457,18 +457,18 @@ G0 Z160                         ;tool up - rapid Z axe  positioning to   coordin
 G40                             ;compesation disable
 
 ;//-------------------------------------------------------------------------
-;//               End machining  decor of the basic part 
+;//               End machining  decor of a basic part 
 ;//-------------------------------------------------------------------------
 
 
 
 ;//-------------------------------------------------------------------------
-;//               Start machining  decor of the  surface mounted part
+;//               Start machining  decor of a  surface mounted part
 ;//-------------------------------------------------------------------------
 p1=o1 X(-E40+E23) YE21
 p2=o1 X-E23 YE21
 ;*******************************************************************************
-;               first passage of the tool 
+;               first passage of  tool 
 ;*******************************************************************************
 
 
@@ -487,7 +487,7 @@ l2
 G20  p2
 G0 Z160                         ;tool up - rapid Z axe  positioning to   point Z
 ;*******************************************************************************
-;               second passage of the tool 
+;               second passage of tool 
 ;*******************************************************************************
 
 G0 X(-E40+E23) Y(E21+E22)       ;rapid XY axes  positioning to  start point X Y 
@@ -506,7 +506,7 @@ G20  p2
 G0 Z160                         ;tool up - rapid Z axe  positioning to   point Z
 M15                             ;spindle stop
 ;//-------------------------------------------------------------------------
-;//               End machining  decor of the  surface mounted part
+;//               End machining  decor of a surface mounted part
 ;//-------------------------------------------------------------------------
 
 
@@ -517,7 +517,7 @@ M15                             ;spindle stop
 ;//
 ;////////////////////////////////////////////////////////////////////////////
 ;//-------------------------------------------------------------------------
-;//              Start cutting   of the  surface mounted part
+;//              Start cutting   of a  surface mounted part
 ;//-------------------------------------------------------------------------
 
 "TOOL7"
@@ -531,7 +531,7 @@ G0 Z20                          ;tool down-rapid Z axe  positioning to  start po
 M116                            ;dust hood down
 "L2"
 ;*******************************************************************************
-;              start  passage of the tool 
+;              start  passage of  tool 
 ;*******************************************************************************
 G21 G42 l4                    ;start  profile
 ZE38                          ;movement  tool down 
@@ -553,7 +553,7 @@ c9
 l4
 G20 G40 l1                         ;end  profile
 ;*******************************************************************************
-;              end  passage of the tool 
+;              end  passage of  tool 
 ;*******************************************************************************
 E38=E38+E30
 E37=E37+1                       ;count increment
@@ -562,12 +562,12 @@ G0 Z160                         ;tool up-rapid Z axe  positioning to   point Z
 G40                             ;disable compesation
 
 ;//-------------------------------------------------------------------------
-;//              End cutting   of the  surface mounted part
+;//              End cutting   of a  surface mounted part
 ;//-------------------------------------------------------------------------
 
 
 ;//-------------------------------------------------------------------------
-;//               Start cutting   of the  basic part
+;//               Start cutting   of a  basic part
 ;//-------------------------------------------------------------------------
 
 E37=0                           ;set counte
@@ -578,7 +578,7 @@ G42                             ;cutter diameter compesation-tool right
 
 "L1"
 ;*******************************************************************************
-;              start  passage of the tool 
+;              start  passage of tool 
 ;*******************************************************************************
 G1 ZE38 F1600                    ;movement  tool down at a feed rate of F  
 G1 XE302 YE303  F3000
@@ -594,13 +594,13 @@ G2 XE320 YE321 RE418
 G2 XE322 YE323 RE422
 G1 XE300
 ;*******************************************************************************
-;              end  pssage of the tool 
+;              end  pssage of tool 
 ;*******************************************************************************
 E38=E38+E30
 E37=E37+1                       ;increment count  
 (GTO,L1,E37<2)
 ;//-------------------------------------------------------------------------
-;//               End cutting   of the  basic part
+;//               End cutting   of a  basic part
 ;//-------------------------------------------------------------------------
 
 G0 Z160                         ;tool up-rapid Z axe  positioning to   point Z
