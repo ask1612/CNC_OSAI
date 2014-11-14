@@ -1,0 +1,646 @@
+
+;????????????????????????????????????????????????????
+;?    Program BED 1400 HeadBoard ver 1.0 20.12.2009 ?
+;?        copyright(c) ASK 2009-2010                ?
+;????????????????????????????????????????????????????
+
+
+
+
+
+
+;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+;
+;                           Start Program
+;
+;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+;=======================================================================================================
+;                       Basic data
+;=======================================================================================================
+
+
+E1=0                            ;zero offset x axis left side
+E2=0                            ;zero offset y axis
+E3=0                            ;zero offset z axis
+E10 =     9                     ;number of the origin 
+E37=0                           ;counte of the tool passage
+E38=-10                         ;cutting depth
+E30=-10                         ;cutting depth over one passage of the tool
+
+
+;//-------------------------------------------------------------------------
+;//               Data for the bed(outside)
+;//-------------------------------------------------------------------------
+E40=1400                        ;//lenght outside(gabarit)
+E41=475                         ;//width  outside without radiuses
+E42=690                         ;//width  outside(gabarit)
+E43=30                          ;// delta1 of the lenght outside
+E44=58                          ;//delta2
+E45=190                         ;//delta3
+E46=4000                        ;//radius1 outside 
+E47=190                         ;//radius2 outside
+E48=643                         ;//radius3 (it is need find)
+E49=500                         ;//rarius4
+E102=130                        ;//delta high
+E103=110                        ;//delta underground
+E104=120                        ;//distance between the outside and iòside part 
+;//-------------------------------------------------------------------------
+;//               Data for the bed(inside)
+;//-------------------------------------------------------------------------
+E50=1360                        ;//lenght inside
+E51=225                         ;//width inside without radiuses
+E56=E46+E103                    ;//radius1 inside
+E57=E47+E102                    ;//radius2
+E58=E48+E102                    ;//radius3 it is need find
+E59=E49-E102                    ;//radius4
+
+;//-------------------------------------------------------------------------
+;//               Data for the upper decor part
+;//-------------------------------------------------------------------------
+E20=75                          ;//delta4 for gtl parametrs(width of the surface mounted part)
+E21=E41-E20                     ;//lower point for surface mounted  part(upper point is E41)
+E22=120                         ;//y for o1(new origin by gtl progaming X=0 Y=150)
+E23=20                          ;//edging size
+
+
+;=======================================================================================================
+;                       Calculating
+;=======================================================================================================
+
+
+;////////////////////////////////////////////////////////////////////////////
+;//
+;//
+;//               Outside part
+;//
+;//
+;////////////////////////////////////////////////////////////////////////////
+
+
+;//-------------------------------------------------------------------------
+;//               Find center Radius1
+;//-------------------------------------------------------------------------
+E60=E40/2-E43;
+E61=(-1)*SQR(E46*E46-E60*E60)     ;//y for the center radius1
+E60=(-1)*E40/2                    ;//x for center radius1
+
+;//-------------------------------------------------------------------------
+;//               Find center Radius2
+;//-------------------------------------------------------------------------
+E70=E47-E44;
+E71=E41+E47                     ;//y for the center radius2
+E72=SQR(E47*E47-E70*E70);
+E70=(E45-E72)*(-1)              ;//x for center radius2
+;//-------------------------------------------------------------------------
+;//               Find  Radius4
+;//-------------------------------------------------------------------------
+E100=(-1)*E40/2                 ;//x for the center radius4
+E101=E42-E49                    ;//y for the center radius4
+
+;//-------------------------------------------------------------------------
+;//               Find  center Radius3
+;//-------------------------------------------------------------------------
+;//;---------------------------------------------------------------------------
+;//;               Calculating a and b. 
+;//;            It is need   for new coordinates of the radius 3
+;//;            in the new origin ((x+a) and (y+b))
+;//;---------------------------------------------------------------------------
+E400=E60                        ;//x for the center radius1 
+E401=E61                        ;//y for the center radius1
+E60=E40/2-E45                   ;// it is A
+E61=E41+E44-(E42-E49)           ;// it is B
+                                ;// sprintf (buf, "e60=%f e61=%f ,e407=%f ", e60,e61,e407);
+                                ;// MessageBox (0, buf, "Help me, please!", MB_ICONEXCLAMATION | MB_OK);
+
+
+;//;---------------------------------------------------------------------------
+;//;                      Calculating c 
+;//;---------------------------------------------------------------------------
+E82=E49+E48;
+E63=(E82*E82+E60*E60+E61*E61-E48*E48)/2     ;//it is C
+
+
+;//;---------------------------------------------------------------------------
+;//; -Calculating quadratic equation a,b,c and discriminant
+;//;-----------------------------------------------------------------------------
+E64=(E60*E60+E61*E61)           ;//it is the coefficient A for quadratic equation
+E65=(2*E61*E63)*(-1)            ;//it is the coefficient B FOR quadratic equation
+E66=(E63*E63-E60*E60*E82*E82)   ;//it is the coefficient C FOR quadratic equation
+E67=SQR(E65*E65-(4*E64*E66))    ;//it is discriminant
+                                ;//sprintf (buf, "e63=%f e64=%f e65=%f e66=%f e67=%f ", e63,e64,e65,e66,e67);
+                                ;//MessageBox (0, buf, "Help me, please!", MB_ICONEXCLAMATION | MB_OK);
+
+;//;---------------------------------------------------------------------------
+;//; -Calculating x1,y1 and x2,y2
+;//;---------------------------------------------------------------------------
+E81=((-1)*E65+E67)/(2*E64)      ;//it is y
+E80=SQR(E82*E82-E81*E81)        ;//it is x
+                                ;//sprintf (buf, "e80=%f e81=%f ", e80,e81);
+                                ;//MessageBox (0, buf, "Help me, please!", MB_ICONEXCLAMATION | MB_OK);
+E82=E100+E80                    ;//X for the center radius3
+E83=E101+E81                    ;//Y for the center radius3
+E60=E400                        ;//X for the center radius1 
+E61=E401                        ;//Y for the center radius1
+
+
+
+
+;//-------------------------------------------------------------------------
+;//                   Find  angle alpha
+;//               and calculate new a and b
+;//-------------------------------------------------------------------------
+E90=ART(E81/E80)                ;//it is alpha
+E92=E49*COS(E90)                ;//it is  A1 outside
+E93=E49*SIN(E90)                ;//it is  B1 outside
+E94=E59*COS(E90)                ;//it is  A1 inside
+E95=E59*SIN(E90)                ;//it is  B1 inside
+                                ;//sprintf (buf, "e92=%f,e93=%f", e92,e93);
+                                ;//MessageBox (0, buf, "Help me, please!", MB_ICONEXCLAMATION | MB_OK);
+
+;//-------------------------------------------------------------------------
+;//               Find  outside points
+;//-------------------------------------------------------------------------
+E300=E40*(-1)                   ;//X for p0
+E301=E41                        ;//Y for p0
+
+E302=E40*(-1)                   ;//X for p1
+E303=0                          ;//Y for p1
+;//-------------------------------------------------------------------------
+;***************************************************************************
+;*//Start data for  the underground arc with Radius1
+;***************************************************************************
+
+o1=X YE22 a                     ;//new origin for the decor part
+
+E304=(E40-E43)*(-1)             ;//X for p2
+E305=0                          ;//Y for p2
+
+E400=E60                        ;//X for the center radius1 
+E401=E61                        ;//Y for the center radius1
+E402=E46                        ;//outside radius1
+E403=E56                        ;//inside radius1
+ 
+
+E306=E43*(-1)                   ;//X for p3
+E307=0                          ;//Y for p3
+;***************************************************************************
+;*//End data for the underground arc with Radius1
+;***************************************************************************
+
+;//-------------------------------------------------------------------------
+
+E308=0;//X FOR P4
+E309=0;//Y FOR P4
+
+E310=0;//X FOR P5
+E311=E41;//Y FOR P5
+;//-------------------------------------------------------------------------
+;***************************************************************************
+;*//Start data for  the arcs  with Radius2,Radius3,Radius4
+;***************************************************************************
+
+
+E312=E70                        ;//X for p6
+E313=E41                        ;//Y for p6
+
+E404=E70                        ;//X for the center radius2 (right side)
+E405=E71                        ;//Y for the center radius2
+E406=E47                        ;//outside radius2
+E407=E57                        ;//inside radius2
+E47=E47*(-1)
+c1=o1 IE404 JE405 rE47
+E47=E47*(-1)
+E27=E47+E20
+c2=o1 IE404 JE405 rE27
+
+E314=E45*(-1)                   ;//X for p7
+E315=E41+E44                    ;//Y for p7
+
+E408=E82                        ;//X for center radius3 (right side)
+E409=E83                        ;//Y for center radius3
+E410=E48                        ;//outside radius3
+E411=E58                        ;//inside radius3
+E48=E48*(-1)
+c3=o1 IE408 JE409 rE48
+E48=E48*(-1)
+E28=E48+E20
+c4=o1 IE408 JE409 rE28
+
+E316=E400+E92                   ;//X for p8
+E317=E93+(E42-E49)              ;//Y for p8
+
+E412=E100                       ;//X for center radius4
+E413=E101                       ;//Y for center radius4
+E414=E49                        ;//outside radius4
+E415=E59                        ;//inside radius4
+c5=o1 IE412 JE413 rE49
+E29=E49-E20
+E29=E29*(-1)
+c6=o1 IE412 JE413 rE29
+E29=E29*(-1)
+
+
+E318=E400-E92                   ;//X for p9
+E319=E317                       ;//Y FOR P9
+
+E416=E412+(E412-E408)           ;//X for center radius3 (left side)
+E417=E409                       ;//Y for center radius3
+E418=E48                        ;//outside radius3
+E419=E58                        ;//inside radius3
+E48=E48*(-1)
+c7=o1 IE416 JE417 rE48
+E48=E48*(-1)
+c8=o1 IE416 JE417 rE28
+
+l1=o1 X(-E40+E23) Y, a-90
+l2=o1 X YE21, a
+l3=o1 X-20 Y, a90
+l4=o1 XYE41, a180
+
+
+
+
+E320=E400+(E400-E314)           ;//X for p10
+E321=E315                       ;//Y for p10
+
+
+E420=E412+(E412-E404)           ;//X for center radius3 (left side)
+E421=E405                       ;//Y for center radius2
+E422=E47                        ;//outside radius2
+E423=E57                        ;//inside radius2
+E47=E47*(-1)
+c9=o1 IE420 JE421 rE47
+E47=E47*(-1)
+c0=o1 IE420 JE421 rE27
+
+E322=E400+(E400-E312)           ;//X for p11
+E323=E313                       ;//Y for p11
+
+;***************************************************************************
+;*//End CNC data for  the arcs  with Radius2,Radius3,Radius4
+;***************************************************************************
+
+
+
+
+
+
+;////////////////////////////////////////////////////////////////////////////
+;//
+;//
+;//               Inside part
+;//
+;//
+;////////////////////////////////////////////////////////////////////////////
+
+;//-------------------------------------------------------------------------
+;//               Find   a and b for the inside point p12
+;//-------------------------------------------------------------------------
+E110=E104+E404                  ;//A for p12 , where E404 is X for the center radius2 (right side)
+                                ;//and E404<0;
+E111=E57-SQR(E57*E57-E110*E110) ;//B for p12
+E112=(E40-E104)*(-1)            ;//X for p12
+E113=E41-E102+E111              ;//Y for p12
+E114=E40/2-E104;
+E115=SQR(E56*E56-E114*E114);
+E117=E115+E401;
+
+
+;//;---------------------------------------------------------------------------
+;//; -Calculating a and b. 
+;//;It is need   for new coordinates of the radius 1
+;//;in the new origin ((x+a) and (y+b))
+;//;---------------------------------------------------------------------------
+E60=E404-E408                    ;//it is A
+E61=E409-E405                    ;//it is B
+                                 ;//sprintf (buf, "e60=%f e61=%f ,e407=%f ", e60,e61,e407);
+                                 ;//MessageBox (0, buf, "Help me, please!", MB_ICONEXCLAMATION | MB_OK);
+
+
+;//;---------------------------------------------------------------------------
+;//; -Calculating c 
+;//;---------------------------------------------------------------------------
+E63=(E407*E407+E60*E60+E61*E61-E411*E411)/2;// it is C
+
+
+;//;---------------------------------------------------------------------------
+;//; -Calculating quadratic equation a,b,c and discriminant
+;//;-----------------------------------------------------------------------------
+E64=(E60*E60+E61*E61)           ;//it is the coefficient A for quadratic equation
+E65=(2*E61*E63)*(-1)            ;//it is the coefficient B for quadratic equation
+E66=(E63*E63-E60*E60*E407*E407) ;//it is the coefficient C for quadratic equation
+E67=SQR(E65*E65-(4*E64*E66))    ;//it is a discriminant
+                                ;//sprintf (buf, "e63=%f e64=%f e65=%f e66=%f e67=%f ", e63,e64,e65,e66,e67);
+                                ;//MessageBox (0, buf, "Help me, please!", MB_ICONEXCLAMATION | MB_OK);
+
+;//;---------------------------------------------------------------------------
+;//; -Calculating x1,y1 and x2,y2
+;//;---------------------------------------------------------------------------
+E72=((-1)*E65-E67)/(2*E64)      ;//it is Y
+E71=SQR(E407*E407-E72*E72)      ;//it is X
+                                ;//sprintf (buf, "e71=%f e72=%f ", e71,e72);
+                                ;//MessageBox (0, buf, "Help me, please!", MB_ICONEXCLAMATION | MB_OK);
+
+
+
+;//-------------------------------------------------------------------------
+;//               Find  inside points
+;//-------------------------------------------------------------------------
+ E324=E112                      ;//X for p12
+ E325=E113                      ;//Y for p12
+ E326=E324                      ;//X for p13
+ E327=E117                      ;//Y for p13
+ E328=E326+2*E114               ;//X for p14
+ E329=E327                      ;//Y for p14
+ E330=E328                      ;//X for p15
+ E331=E325                      ;//Y for p15
+ E332=E404-E71                  ;//X for p16
+ E333=E405+E72                  ;//Y for p16
+
+ E334=E412+E94                  ;//X for p17
+ E335=E94+(E42-E59)             ;//Y for p17
+
+ E336=E412-E94                  ;//X for p18
+ E337=E335                      ;//Y for p18
+
+ E338=E412+(E412-E332)          ;//X for p19
+ E339=E333                      ;//Y for p19
+
+
+
+
+
+;=======================================================================================================
+;
+;                           Start machining
+;
+;=======================================================================================================
+
+
+
+
+(DIS,"E74 =",E74)
+"START"
+E500=TIM
+G29
+M60;start vacuum
+(DIS,"TEST")
+(UOT,E10,XE1,YE2,ZE3)           ;set the origin
+
+
+;////////////////////////////////////////////////////////////////////////////
+;//
+;//                            Cutting  1
+;//
+;////////////////////////////////////////////////////////////////////////////
+;//-------------------------------------------------------------------------
+;//              Start cutting 1  of the  surface mounted part
+;//-------------------------------------------------------------------------
+
+E37=0                           ;set counte
+E38=E30                         ;set cutting depth 
+M6 T7.7                         ;get the tool7
+M13 S12000                      ;start spindle rotation clockwise.Speed is S
+M116                            ;dust hood down
+"L3"
+;*******************************************************************************
+;              start  passage of the tool 
+;*******************************************************************************
+G0 X(E300+E23) Y(E301+E22)      ;rapid XY axes  positioning to  start point X Y
+G0 Z20                          ;tool down-rapid Z axe  positioning to  start point Z
+G42                             ;cutter diameter compesation-tool right
+G1 ZE38 F1600                   ;movement  tool down at a feed rate of F
+G1 Y(E301+E22-E20) F3000        ;movement  tool Y-direction  at a feed rate of F
+G0 Z160                         ;tool up-rapid Z axe  positioning to   point Z
+G40                             ;disable compesation
+E38=E38+E30
+E37=E37+1                       ;increment count 
+(GTO,L3,E37<2)
+;*******************************************************************************
+;              end  passage of the tool 
+;*******************************************************************************
+M15                             ;spindle stop
+;//-------------------------------------------------------------------------
+;//              End cutting 1  of the  surface mounted part
+;//-------------------------------------------------------------------------
+
+;////////////////////////////////////////////////////////////////////////////
+;//
+;//                          Machining decor
+;//
+;////////////////////////////////////////////////////////////////////////////
+
+
+;//-------------------------------------------------------------------------
+;//               Start machining  decor of the basic part 
+;//-------------------------------------------------------------------------
+
+"TOOL1"
+M6 T18.18                       ;get the tool1
+M13 S12000                      ;start spindle rotation clockwise.Speed is S 
+G0 XE324  Y(E327+(E325-E327)/2) ;rapid XY axes  positioning to  start point P(X,Y)
+G0 Z20                          ;rapid Z axe  positioning to  start point Z
+G41                             ;cutter diameter compesation-tool left 
+M116                            ;dust hood down
+;*******************************************************************************
+;               first passage of the tool 
+;*******************************************************************************
+G1 Z-15 F1600                   ;movement  tool down at a feed rate of F
+G1 XE326 YE327 F3000
+G2 XE328 YE329 RE56
+G1 XE330 YE331
+G2 XE332 YE333 RE57
+G2 XE334 YE335 RE58
+G3 XE336 YE337 RE59
+G2 XE338 YE339 RE58
+G2 XE324 YE325 RE57
+G1 Y(E327+(E325-E327)/2)
+;*******************************************************************************
+;               second passage of the tool 
+;*******************************************************************************
+G1 Z-16 F1600                   ;movement  tool down at a feed rate of F 
+G1 XE326 YE327 F3000
+G2 XE328 YE329 RE56
+G1 XE330 YE331
+G2 XE332 YE333 RE57
+G2 XE334 YE335 RE58
+G3 XE336 YE337 RE59
+G2 XE338 YE339 RE58
+G2 XE324 YE325 RE57
+G1 Y(E327+(E325-E327)/2)
+G0 Z160                         ;tool up - rapid Z axe  positioning to   coordinate Z
+G40                             ;compesation disable
+
+;//-------------------------------------------------------------------------
+;//               End machining  decor of the basic part 
+;//-------------------------------------------------------------------------
+
+
+
+;//-------------------------------------------------------------------------
+;//               Start machining  decor of the  surface mounted part
+;//-------------------------------------------------------------------------
+p1=o1 X(-E40+E23) YE21
+p2=o1 X-E23 YE21
+;*******************************************************************************
+;               first passage of the tool 
+;*******************************************************************************
+
+
+G0 X(-E40+E23) Y(E21+E22)       ;rapid XY axes  positioning to  start point X Y 
+G0 Z20                          ;tool down-rapid Z axe  positioning to  start point Z
+G1 Z-15 F1600                   ;it performs  1 step z (E38) tool down
+F3000
+G21  p1
+l2
+c0 s2
+c8
+c6
+c4 s2
+c2
+l2
+G20  p2
+G0 Z160                         ;tool up - rapid Z axe  positioning to   point Z
+;*******************************************************************************
+;               second passage of the tool 
+;*******************************************************************************
+
+G0 X(-E40+E23) Y(E21+E22)       ;rapid XY axes  positioning to  start point X Y 
+G0 Z20                          ;tool down-rapid Z axe  positioning to  start point Z  
+G1 Z-16 F1600                   ;it performs  1 step z (E38) tool down. Feed rate is F
+F3000
+G21  p1
+l2
+c0 s2
+c8
+c6
+c4 s2
+c2
+l2
+G20  p2
+G0 Z160                         ;tool up - rapid Z axe  positioning to   point Z
+M15                             ;spindle stop
+;//-------------------------------------------------------------------------
+;//               End machining  decor of the  surface mounted part
+;//-------------------------------------------------------------------------
+
+
+
+;////////////////////////////////////////////////////////////////////////////
+;//
+;//                            Cutting  2
+;//
+;////////////////////////////////////////////////////////////////////////////
+;//-------------------------------------------------------------------------
+;//              Start cutting   of the  surface mounted part
+;//-------------------------------------------------------------------------
+
+"TOOL7"
+M6 T7.7                         ;get the tool7
+M13 S12000                      ;start spindle rotation clockwise.Speed is S
+F3000                           ;set feed rate
+E37=0                           ;set counte
+E38=E30                         ;set cutting depth 
+G0 X(E300+E23) Y(E301+E22)      ;rapid XY axes  positioning to  start point X Y
+G0 Z20                          ;tool down-rapid Z axe  positioning to  start point Z
+M116                            ;dust hood down
+"L2"
+;*******************************************************************************
+;              start  passage of the tool 
+;*******************************************************************************
+G21 G42 l4                    ;start  profile
+ZE38                          ;movement  tool down 
+l1
+l2
+c0 s2
+c8
+c6
+c4 s2
+c2
+l2
+l3
+l4
+c1
+c3
+c5
+c7
+c9
+l4
+G20 G40 l1                         ;end  profile
+;*******************************************************************************
+;              end  passage of the tool 
+;*******************************************************************************
+E38=E38+E30
+E37=E37+1                       ;count increment
+(GTO,L2,E37<2)
+G0 Z160                         ;tool up-rapid Z axe  positioning to   point Z
+G40                             ;disable compesation
+
+;//-------------------------------------------------------------------------
+;//              End cutting   of the  surface mounted part
+;//-------------------------------------------------------------------------
+
+
+;//-------------------------------------------------------------------------
+;//               Start cutting   of the  basic part
+;//-------------------------------------------------------------------------
+
+E37=0                           ;set counte
+E38=E30                         ;set cutting depth 
+G0 XE300 YE301                  ;rapid XY axes  positioning to  start point X Y 
+G0 Z20                          ;tool down-rapid Z axe  positioning to  start point Z
+G42                             ;cutter diameter compesation-tool right
+
+"L1"
+;*******************************************************************************
+;              start  passage of the tool 
+;*******************************************************************************
+G1 ZE38 F1600                    ;movement  tool down at a feed rate of F  
+G1 XE302 YE303  F3000
+G1 XE304 YE305
+G2 XE306 YE307 RE402
+G1 XE308 YE309
+G1 XE310 YE311
+G1 XE312 YE313
+G2 XE314 YE315 RE406
+G2 XE316 YE317 RE410
+G3 XE318 YE319 RE414 
+G2 XE320 YE321 RE418
+G2 XE322 YE323 RE422
+G1 XE300
+;*******************************************************************************
+;              end  pssage of the tool 
+;*******************************************************************************
+E38=E38+E30
+E37=E37+1                       ;increment count  
+(GTO,L1,E37<2)
+;//-------------------------------------------------------------------------
+;//               End cutting   of the  basic part
+;//-------------------------------------------------------------------------
+
+G0 Z160                         ;tool up-rapid Z axe  positioning to   point Z
+G40                             ;disable compesation 
+M15                             ;stop spindle
+M115                            ;dust hood up
+G79 G0 X0 Y0                    ;rapid XY axeS  positioning to   point X=0 Y=0 
+"END"
+;=======================================================================================================
+;
+;                           End machining
+;
+;=======================================================================================================
+
+M68                             ;stop vacuum
+M30                             ;end program
+E499=TIM
+E498=E499-E500
+(DIS,"WORKING TIME ON PART 2 =",E498)
+
+;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+;
+;                           End Program
+;
+;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
